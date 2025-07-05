@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"bindings_setup",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"bindings_setup",
+  "parent":{
+    "name":"bindings",
+    "path":"folders/Scripts/bindings.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

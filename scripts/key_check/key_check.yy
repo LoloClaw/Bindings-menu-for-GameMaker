@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"key_check",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"key_check",
+  "parent":{
+    "name":"bindings",
+    "path":"folders/Scripts/bindings.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

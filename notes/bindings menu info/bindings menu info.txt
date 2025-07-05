@@ -1,0 +1,369 @@
+		  /\
+   /\    /  \    /\
+   \/   / :: \   \/
+       /      \
+      /________\
+     /          \
+    /  Made By:  \
+   /              \
+  /   Lolo Claw    \
+ /                  \
+/____________________\   
+|                    |
+
+Here is how to use the rebinding menu and custom bindings!!!!
+Have fun!
+If you have any trouble you can contact me on discord @loloclaw or on bluesky @loloclaw.bsky.social
+If you want to check out my games you can do so here: https://gamejolt.com/@loloclaw, https://lolo-claw.itch.io/
+Check out my youtube, by any luck I will have made a tutorial for this by now: www.youtube.com/@loloclaw
+Let's get to it.
+
+This includes both the bindings system and my menu system. The menu system is used in the bindings system and is made to be really easy to use with it.
+This is meant to be a very simple way to do bindings, with no external non-gamemaker skills requiered but it's not comprehensive. 
+If you want a full rebinding system that supports all gamepads I suggest using the Input library
+
+You don't have to credit me if you use this in a game but I'd appreaciate it if you do!
+
+Here is a features list:
+- quick rebinding menu with built-in icons
+- easy set-up
+- check for mouse scrolls or controller sticks as if they were buttons
+- drawing keys for easy tutorials
+- very commented code for easy modifications
+cons:
+- only playstation icons supported for gamepads
+- loading older bindings eats newer ones
+
+Pack contents:
+- spr_keyboard
+- spr_mouse
+- spr_playstation
+- bindings.gml
+- bindings_setup.gml
+- draw_bindings.gml
+- draw_menu.gml
+- key_check.gml
+- this note
+
+List of stuff:
+1) Set up
+2) Drawing the bindings menu
+	a) Menu systems mode
+	b) Custom exit
+3) Saving/loading
+4) Getting keys (held, pressed, released)
+5) Drawing bindings (for tutorials and similar)
+6) Menu system
+	a) Setting up menus
+	b) Using menus
+	c) switch mode
+	d) List mode
+7) Functions list and explanation
+	a) Bindings menu
+	b) Bindings setup
+	c) Drawing bindings
+	d) Drawing menus
+	e) Checking keys
+
+
+|================================================== SET UP ==================================================|
+
+This section is dedicated to setting up the controls system.
+STEP 1: In the very beginning of your game use the bindings_setup() function, this sets up all the variables needed and loads previously saved bindings (see the Saving/loading section for info)
+
+STEP 2: Setting possible and default bindings:
+		Now you need to add your bindings to the game, these will also be used as the default bindings
+		Go to the bindings_setup script and look for the set_default_bindings() function.
+		In there you can add both normal and hidden bindings. Hidden bindings are bindings that you can check for but the player doesn't see in the bindings menu and therefore cannot change
+		Use the new_binding() function to add the bindings in the right place (specified in the comments in there)
+		To set a binding as hidden simply write true in the hidden argument in the new_binding() function. It defaults to false so you don't have to write anything if you don't want that binding to be hidden
+		Always put the non-hidden bindings BEFORE the hidden ones
+		
+		You will need to give a name for the binding, this will be used to display to the player and for you when calling the bindings
+		The second third and fourth arguments are respecively the bindings for keyboard, mouse and gamepad
+		If you want to set no default binding for something put "noone" (as a string) in the binding slot
+		If you want to set the binding for the mouse as mouse scrolls just write "up" or "down"
+		if you want to set the binding for the gamepad to a stick direction write "L" for left stick or "R" for the right one then the direction. Examples "Lup" is left stick up "Rleft" is right stick left
+		The last argument is the hidden setting. Always put all hidden bindings after all non-hidden ones
+
+
+|================================================== DRAWING THE BINDING MENU ==================================================|
+
+There is no object that acts as the menu, it's all done through functions so you can put them wherever you want
+STEP 1: In the CREATE event for the object that will draw the menu use the function setup_binding_menu()
+
+STEP 2: Draw the menu by using the draw_bindings_menu() function in the DRAW GUI event
+		The firt argument is the font for the bigger text. This is used in the table text and the menus under the table. The font should be 20-30 in size
+		The second argument is the maximum y position for the table, keep in mind that there is some text above that
+		The third argument is the x position for the center of the table
+		The fourth argument is the small font. This is used in the button prompts and the insert new key one. The font should be around 12 in size
+		The fifth argument is the number of rows for each page of the table
+		The sixth argument is the size of the menu. This will also change all text and image sizes for the menu
+		
+STEP 3: Exiting the menu: there are to ways to do this, one is with the menu system (see entry below), the other is with a custom exit.
+		
+		/---------------------------- WITH THE MENU SYSTEM ----------------------------\
+		Setup a menu as described below in the menu system entry (you don't have to use the setup_menu() function again) and put the draw_bindings_menu() function as a menu page
+		Here is an example:
+		[CREATE EVENT]
+		setup_binding_menu()
+		[DRAW GUI EVENT]
+		if (menu == 0) draw_menu(room_width / 2, room_height / 2 - 200, [["Play", room_goto, [rm_game_start]], ["Bindings", menu_switch, [1]], ["Quit", game_end, [0]]]);
+		if (menu == 1) draw_bindings_menu(fnt_big, 100, room_width / 2, fnt_small, 8, 1);
+		
+		This will create a menu with 3 options: "Play" goes to the start of your game, "Bindings" switches to the bindings menu page and "Quit" exits the game
+		When exiting the bindings menu you will go back to the starting menu page
+		
+		/---------------------------- WITH A CUSTOM EXIT ----------------------------\
+		Go to the bindings.gml script and edit the exit_menu() function to exit the menu.
+		This can be an instance_destroy() if you have a dedicated object fo the menu or whatever you need to switch pages in your own menu system.
+
+
+|================================================== SAVING AND LOADING ==================================================|
+
+The loading part is already covered in the SET UP section but, when you add new bindings they will be eaten by the old saved ones, so during testing use the reset default button (in game) to get the new bindings.
+STEP 1: To save the bindings use the save_bindings() whenever you want to save them, I recommend to save bindings either when exiting the menu or when closing the game.
+
+STEP 2: (optional) Changing save location: edit the BINDINGFILE macro, located in bindings_setup.gml
+
+You can reset bindings to the defaut ones by calling the set_default_bindings() at any time
+
+
+|================================================== GETTING KEYS ==================================================|
+
+There are 4 functions to get bindings, all return booleans
+They are key_check(), key_check_pressed() and key_check_released()
+They work the same as the gamemaker ones: key_check() returns true the whole time the key is held, key_check_pressed() returns true only when the key is first pressed and key_check_released() returns true only when the key is released.
+There are a few limitations however: stick movement works with the pressed and released functions but they return true the whole time, same as the normal one.
+Mouse scrolling is the same between the 3 functions
+There is only one argument and it's the binding name as a string, just like the player sees it in the menu.
+
+The fourth function is gamepad_check_any(), it returns true if any gamepad button is pressed. This doesn't account for stick movement.
+
+To get the stick direction use the default gamemaker functions with global.slot as the slot argument. Global.slot is a variable (updated with gamepad_set_target() and with any of the key_check() functions) that contains the slot the gamepad is connected to.
+To check if a gamepad is connected simply use the global.controller variable, it's true if any gamepad is connected.
+
+|================================================== DRAWING BINDINGS ==================================================|
+
+With the draw_binding() function you can draw a binding (shocker). This can be useful for tutorials, button prompts etc...
+The draw_binding() function draws some text, a binding, wich can be either the gamepad one, or both the keyboard and mouse ones (or only one of them if there is no other binding), then draws some other text.
+You can do this to write something like: Press {input} to activate
+
+The firts argument is the x position, for the middle of the drawn stuff.
+The second one is the y position
+The third one is the text that will be drawn before the binding
+The fourth one is the binding name (as a string)
+The fifth one is the text that will be drawn after the binding
+The sixth one is the size of the text + binding, the default is 1
+
+The font that will be used is the current drawing font.
+The icon for the binding is automatically rescaled to the size of the font.
+
+|================================================== MENU SYSTEM ==================================================|
+
+This section is dedicated to the menu system, while not required to do the bindings it can be useful and you can use it as a normal menu system.
+The menu works with mouse, keyboard and gamepad using the hidden bindings that are already set as default.
+The menu system works with functions only, no objects, so you can use it wherever you want
+
+/---------------------------- SETTING UP ----------------------------\
+In the CREATE event of the object just run setup_menu(). That's it!
+
+/---------------------------- USING THE SYSTEM ----------------------------\
+The menu can have multiple pages, the default page is page 0
+The menu variable holds the current page of the menu
+In the DRAW GUI event use if statements to check for the page that you are in (you could use switch statements but I don't like them so I won't) then call the draw_menu() function with the arguments for that page, like this:
+if (menu == 0) draw_menu(arguments for page 0);
+if (menu == 1) draw_menu(arguments for page 1);
+if (menu == 2) draw_menu(arguments for page 2);
+.....
+This allows you to draw sprites, text or anything you want or changing the position of the menu between pages like this:
+if (menu == 0) draw_menu(arguments for page 0);
+if (menu == 1) 
+{
+	draw_menu(arguments for page 1);
+	draw_sprite(spr_menu_background, 0, 0, 0);
+}
+if (menu == 2)
+{
+	draw_menu(arguments for page 2);
+	draw_text(room_width / 2, 100, "Your text")
+}
+
+The draw_menu() function takes 4 arguments:
+The first one is the x posistion
+The second one is the y position for the top of the menu
+The third one is the options array, explained a bit below
+The fourth one is the size of the menu, it defaults to 1
+
+The options array goes like this:
+[["Name 1", function 1, [argument 1, agument 2, ...]], ["Name 2", function 2, [argument 1, argument 2, ...]], ...]
+
+The name is the display name for the option
+The function is the function to be called when the player clicks the option, remember to omit the parentheses: ()
+Then there is the arguments array for the function, if your function takes no arguments put an array with 0 like this: [0]
+Then you repeat!
+
+This was the normal/function mode for the menu, there ar other 2 modes:
+
+/---------------------------- SWITCH MODE ----------------------------\
+Writing "switch" (as a string) in the options array in the function slot to put that entry on switch mode
+switch mode turns that entry to a toggle that can change a global variable to true or false
+In switch mode the arguments array has to be [gloval variable name (string), inverted (boolean)] where the firts slot is the global variable as a string and the second is if the toggle is to be inveretd.
+An inverted toggle will show the button as on when the variable is false.
+
+The visuals are like this:
+If the variable given is true (or false and inverted): entry name: [X]
+If the variable given is false (or true and inverted): entry name: [ ]
+
+/---------------------------- LIST MODE ----------------------------\
+Writing "options" (as a string) in the array in the function slot to put that entry on list mode
+List mode makes it so that selecting that entry adds 1 to a global variable and displays a corresponding string
+The global variable goes from 0 to the max number of options. The variable automatically loops to 0 if it reaches the max.
+In list mode the arguments array has to be [global variable name (string), name 1, name 2, ...] where the first slot is the global variable as a string and all the others are the names of the options (also strings).
+this can be really useful for stuff like difficulty modes or languages settings.
+
+Here is an example (only the options array is present here): ["Difficulty:", "options", ["difficulty", "Easy", "Medium", "Hard"]]
+This would display:
+If the global.difficulty variable is 0: Difficulty: Easy
+If the global.difficulty variable is 1: Difficulty: Medium
+If the global.difficulty variable is 2: Difficulty: Hard
+
+Clicking while the option is on "Hard" will go back to "Easy"
+
+|================================================== FUNCTIONS EXPLANATIONS ==================================================|
+
+Here is a more in-depth description of all the functions
+The chapter names are the function file names
+
+/---------------------------- BINDINGS.GML ----------------------------\
+draw_bindings_menu(_font, _ystart, _x, _small_font, _rows = 8, _size = 1):
+	This is the function that draws the whole menu for you, you have to put it in the draw gui event, remember to call bindings_setup_menu() in the object's create event!
+
+	_font: the font to use for the big text. It's suggested to use a size 20-30 font but you can do whatever you want
+	_ystart: the top y point for the menu. Top table descriptions don't count
+	_x: center position for the menu
+	_small_font: the font to use for the small text. Suggested size 12 fond but you can try others and just see how it goes
+	_rows: Defaults to 8. The amount of rows for the menu
+	_size: Defaults to 1. The size for the menu, changes all the font sizes etc.
+	
+exit_menu():
+	This is the function used to exit the bindings menu.
+	Change this to exit the menu how you want.
+	
+setup_binding_menu():
+	This function is used in the create event to setup the bindings menu.
+	Creates the following variables:
+		hascontrol = true; //When this is true you have control of the menu.
+		page = 0; //the current page of the menu
+		binding_iframes = 0; //iframes for input overflow
+		row = 0; //the current selected row
+		column = 0; //the current selected column
+		mode = "mouse"; //the mode, can be "mouse", "keyboard" or "gamepad"
+		if (global.controller) mode = "gamepad"; //sets the mode as gamepad if one is connected
+		choosing = false; //when this variable is true, the player is choosing a new binding
+		index = 0; //the current index in the bindings array
+		type = 0; //the binding type
+	Also setups a normal menu.
+	
+bindings_filter(element, index):
+	Filtering function for the bindings, used to hide the hidden bindings from the menu.
+	
+/---------------------------- BINDINGS_SETUP.GML ----------------------------\
+bindings_setup():
+	Setups all the bindings. Call at the beginning of the game.
+	Calls the following functions:
+		gamepad_set_target(); //gets if the gamepad is connected and in which slot it's connected in
+		set_default_bindings(); //loads default bindings
+		load_bindings(); //loads saved bindings (if they exist)
+		binding_setup_list(); //loads the image_index list for the bindings
+		
+set_default_bindings():
+	Resets all bindings to default.
+	Write there your bindings.
+	This is already used in the bindings menu.
+	
+new_binding(_display, _keyboard_input, _mouse_input, _gamepad_input, _hidden = false):
+	This adds a new binding to the game, use in the previous function's code.
+	
+	_display: the display name for the binding, also used for calling the binding. It's a string.
+	_keyboard_input: the default keyboard input for this binding. Use either ord("X") (where X is a key on the keyboard) or one of the virtual keyboard constants like vk_space.
+	_mouse_input: the default mouse input for this binding. Use one of the mouse constants like mb_right or "up" for mouse_scroll_up or "down" for mouse_scroll_down.
+	_gamepad_input: the default gamepad input for this binding. Use either "Sdir" (where S is the side of the joystick (L or R) and dir is the direction of the joystick ("up", "down", "left", or "right")) or one of the gamepad constants like gp_face1.
+	_hidden: defaults to false. Set as true to hide this binding from being changed.
+	
+binding_setup_list():
+	Setups the global.binding_list array.
+	global.binding_list[0] contains all the keyboard bindings, letters and symbols first, then virtual keyboard constants
+	global.binding_list[1] contains all mouse bindings
+	global.binding_list[2] contains all gamepad bindings
+	
+binding_get_image(_type, _item):
+	Gets the image_index for the keyboard/mouse/gamepad sprite for the given binding
+	
+	_type: 0 for keyboard, 1 for mouse, 2 for gamepad.
+	_item: The binding to search for, not the name but the binding. Examples: ord("D"), vk_space, mb_left, gp_face3, "Lup"
+	
+save_bindings()
+	Saves the bindings in a file.
+	
+load_bindings()
+	Loads the bindings from the file. Overwrites all default bindings, be careful if you added a new bindng with an update you'll need to reset default bindings.
+	
+/---------------------------- DRAW_BINDINGS.GML ----------------------------\
+draw_binding(_x, _y, _pre_text, _binding, _post_text, _size = 1):
+	draws a binding, useful for tutorials! This draws only the gamepad if a gamepad is connected or both the mouse and keyboard bindings if it's not.
+	
+	_x: the center x position for the binding, this took me a while to calculate and I'm super proud of it :)
+	_y: the y position
+	_pre_text: the text to draw before the binding
+	_binding: the name of the binding to draw
+	_post_text: the text to draw after the binding
+	_size: defaults to 1. It's the size of the text
+	
+/---------------------------- KEY_CHECK.GML ----------------------------\
+key_get_index(_name):
+	Gets the index within the global.bindings array given the display name.
+	
+	_name: the display name for the binding
+	
+gamepad_set_target():
+	Sets the global.slot and global.controller variables.
+	global.slot contains the slot number where the gamepad is connected
+	global.controller is true if a gamepad is connected.
+	
+key_check(_name) / key_check_pressed(_name) / key_check_released(_name):
+	checks if a key is held/pressed/released
+	NOTE: Keys like mouse_wheel_up and gamepad stick movement have no difference in the 3 functions
+	
+	_name: the display name for the binding to check for
+	
+gamepad_check_any():
+	Checks if any gamepad button is being pressed, doesn't check for stick movement.
+	
+/---------------------------- DRAW_MENU.GML ----------------------------\
+draw_menu(_x, _y, _arguments, _size = 1):
+	Draws a menu. Check the above menu system section for more info. Use in the draw gui event 
+	
+	_x: the x position for the center of the menu
+	_y: the top y position for the menu
+	_arguments: the options array
+	_size: defaults to 1. The size of the menu
+	
+menu_swicth(_menu, _iframes = 10):
+	switches the page for the menu.
+	
+	_menu: the page to switch to.
+	_iframes: defaults to 10. The iframes are to prevent input overflows in menus, 10 should be ok.
+	
+setup_menu()
+	Use in the create event. Sets up a menu.
+	Sets up a few variables.
+	
+	mouse = true; //if it's in mouse mode
+	menu_iframes = 10; //to prevent input overflow
+	menu = 0; //the current page
+	selected = 0; //the current selected argument
+	
+
+Thank you for using this!!!!!
+If you use this in a game let me know, I'd love to see this used!
